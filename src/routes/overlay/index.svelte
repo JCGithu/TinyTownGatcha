@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
   import { scale } from "svelte/transition";
   import { elasticOut, sineIn } from "svelte/easing";
-  import queue from "async/queue";
+  import async from "async";
 
   //VARIABLES
   let userName, houseNum, chosenHouse;
@@ -17,7 +17,7 @@
     return Math.floor(Math.random() * max);
   }
 
-  let Queue = queue(function (task, callback) {
+  let asyncQueue = async.queue(function (task, callback) {
     task.then((output) => {
       callback(output);
     });
@@ -85,7 +85,7 @@
         if (!data) return;
         if (data.rewardId === "774e6571-18da-4dda-b54d-cf7e47b4a668") {
           console.log("REDEEMED!");
-          Queue.push(getHouse(data));
+          asyncQueue.push(getHouse(data));
         }
       };
     };
