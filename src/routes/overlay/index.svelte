@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
   import { scale } from "svelte/transition";
   import { elasticOut, sineIn } from "svelte/easing";
-  import async from "async";
+  import { AwaitQueue } from "awaitqueue";
 
   //VARIABLES
   let userName, houseNum, chosenHouse;
@@ -17,38 +17,39 @@
     return Math.floor(Math.random() * max);
   }
 
-  let asyncQueue = async.queue(function (task, callback) {
-    task.then((output) => {
-      callback(output);
-    });
-  }, 1);
+  const asyncQueue = new AwaitQueue();
 
   async function getHouse(data) {
-    houseNum = randomNum(numberOfHouses);
-    //
-    let sending = {
-      username: data.userName,
-      number: houseNum,
-    };
-    console.log(sending);
-    const res = await fetch("/api", {
-      method: "POST",
-      body: JSON.stringify(sending),
-    });
-    console.log(res.status);
-    const json = await res.json();
-    if (!json.works) return;
-    if (json.first) first = true;
-    userName = data.userName;
-    chosenHouse = houseData[listOfHouses[houseNum]];
-    console.log(chosenHouse);
-
-    return new Promise((res) => {
-      setTimeout(() => {
-        chosenHouse = null;
-        first = false;
-        res();
-      }, 10000);
+    return new Promise(async (resolve) => {
+      setTimeout(async () => {
+        houseNum = randomNum(numberOfHouses);
+        //
+        let sending = {
+          username: data.userName,
+          number: houseNum,
+        };
+        console.log(sending);
+        const res = await fetch("/api", {
+          method: "POST",
+          body: JSON.stringify(sending),
+        });
+        console.log(res.status);
+        const json = await res.json();
+        if (json.works) {
+          if (json.first) first = true;
+          userName = data.userName;
+          chosenHouse = houseData[listOfHouses[houseNum]];
+          setTimeout(() => {
+            chosenHouse = null;
+            first = false;
+            console.log("function successed");
+            resolve("THIS ENDED");
+          }, 10000);
+        } else {
+          console.log("Function failed");
+          resolve("Failed");
+        }
+      }, 1000);
     });
   }
 
@@ -78,14 +79,18 @@
         id: "123",
       };
       StreamerBot.send(JSON.stringify(Subscribe));
-      StreamerBot.onmessage = (data) => {
+      StreamerBot.onmessage = async (data) => {
         console.log("Redeem triggered");
         data = JSON.parse(data.data).data;
         console.log(data);
         if (!data) return;
         if (data.rewardId === "774e6571-18da-4dda-b54d-cf7e47b4a668") {
           console.log("REDEEMED!");
-          asyncQueue.push(getHouse(data));
+          await asyncQueue
+            .push(() => getHouse(data))
+            .then(() => {
+              console.log("finished job in queue");
+            });
         }
       };
     };

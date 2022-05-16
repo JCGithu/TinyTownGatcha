@@ -19,6 +19,7 @@
   "type": "module",
   "dependencies": {
     "@datastructures-js/queue": "^4.1.4",
+    "awaitqueue": "^2.4.0",
     "dotenv": "^16.0.1",
     "mongodb": "^4.6.0"
   }
