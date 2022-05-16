@@ -1,0 +1,24 @@
+{
+  "name": "tinytowngatcha",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "svelte-kit dev",
+    "build": "svelte-kit build",
+    "package": "svelte-kit package",
+    "preview": "svelte-kit preview",
+    "prepare": "svelte-kit sync"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "next",
+    "@sveltejs/kit": "next",
+    "sass": "^1.51.0",
+    "svelte": "^3.44.0",
+    "svelte-preprocess": "^4.10.6"
+  },
+  "type": "module",
+  "dependencies": {
+    "async": "^3.2.3",
+    "dotenv": "^16.0.1",
+    "mongodb": "^4.6.0"
+  }
+}
